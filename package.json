@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./server.js"
+    "start": "node ./server/index.js"
   },
   "keywords": [
     "Node",
@@ -16,8 +16,14 @@
   "license": "ISC",
   "dependencies": {
     "aws-sdk": "^2.401.0",
+    "body-parser": "^1.18.3",
+    "compression": "^1.7.3",
     "elasticsearch": "^15.4.1",
     "express": "^4.16.4",
     "http-aws-es": "^6.0.0"
+  },
+  "devDependencies": {
+    "babel-preset-env": "^1.7.0",
+    "babel-register": "^6.26.0"
   }
 }
