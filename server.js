@@ -1,11 +1,19 @@
 const express = require('express')
 const AWS = require('aws-sdk');
 const elasticsearch = require('elasticsearch');
-
+const bodyParser = require('body-parser');
+const compression = require('compression');
 const config = require('./config/secrets.config');
 
 // Express server
 const app = express();
+app.use( bodyParser.json() );       // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+  extended: true
+}));
+app.use(express.json());
+app.use(compression());
+
 AWS.config.update({
   credentials: new AWS.Credentials(config.secrets.ACCESS_KEY_ID, config.secrets.ACCESS_SECRET_ID),
   region: 'us-west-2'
@@ -24,6 +32,8 @@ const PORT = process.env.PORT || 4000;
 
 app.post('/search/activity', (req, res) => {
 
+  console.log('kill');
+  console.log(req.body);
   const term = req.body.searchTerm;
 
   client.search({
