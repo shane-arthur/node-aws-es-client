@@ -32,8 +32,6 @@ const PORT = process.env.PORT || 4000;
 
 app.post('/search/activity', (req, res) => {
 
-  console.log('kill');
-  console.log(req.body);
   const term = req.body.searchTerm;
 
   client.search({
