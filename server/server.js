@@ -45,9 +45,25 @@ app.post('/search/activity', (req, res) => {
     }
   }).then(response => {
     const data = response.hits.hits;
-    res.status(400).send({
-      data
-    });
+    const campids = data.map(item => item._source.campid);
+    client.search({
+      index: config.indexes.CAMPS,
+      body: {
+        "query": {
+          "constant_score": {
+            "filter": {
+              "terms": {
+                "idcampdetails": campids
+              }
+            }
+          }
+        }
+      }
+    }).then(response => {
+      res.status(200).send({
+        data: response.hits.hits
+      });
+    })
   }).catch(error => {
     console.log('error from elastic-search ' + error);
     res.status(400).send({
@@ -69,7 +85,12 @@ app.get('/activities', (req, res, next) => {
   }).then(response => {
     const data = response.hits.hits;
     res.status(400).send({
-      data
+      data: data.map(item => {
+        return {
+          id: item._source.idactivity,
+          name: item._source.name
+        }
+      })
     });
   }).catch(error => {
     console.log('error from elastic-search ' + error);
