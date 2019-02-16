@@ -3,12 +3,12 @@ const AWS = require('aws-sdk');
 const elasticsearch = require('elasticsearch');
 const bodyParser = require('body-parser');
 const compression = require('compression');
-const config = require('./config/secrets.config');
+const config = require('../config/secrets.config');
 
 // Express server
 const app = express();
-app.use( bodyParser.json() );       // to support JSON-encoded bodies
-app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+app.use(bodyParser.json()); // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({ // to support URL-encoded bodies
   extended: true
 }));
 app.use(express.json());
@@ -41,6 +41,29 @@ app.post('/search/activity', (req, res) => {
         match: {
           "activity": term
         }
+      }
+    }
+  }).then(response => {
+    const data = response.hits.hits;
+    res.status(400).send({
+      data
+    });
+  }).catch(error => {
+    console.log('error from elastic-search ' + error);
+    res.status(400).send({
+      error
+    });
+  });
+});
+
+
+app.get('/activities', (req, res, next) => {
+
+  client.search({
+    index: config.indexes.ACTIVITY,
+    body: {
+      query: {
+        match_all: {}
       }
     }
   }).then(response => {
