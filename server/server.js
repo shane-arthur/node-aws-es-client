@@ -1,9 +1,12 @@
-const express = require('express')
-const AWS = require('aws-sdk');
-const elasticsearch = require('elasticsearch');
-const bodyParser = require('body-parser');
-const compression = require('compression');
-const config = require('../config/secrets.config');
+import express from 'express';
+import AWS from 'aws-sdk';
+import elasticsearch from 'elasticsearch';
+import bodyParser from 'body-parser';
+import compression from 'compression';
+import { SECRETS, INDEXES } from '../config/secrets.config';
+const getAllActivitesRoute = './routes/get-all-activities';
+const getCampsPerActivityRoute = './routes/get-all-camps-per-activity';
+const searchCampByActivityRoute = './routes/search-camp-by-activity';
 
 // Express server
 const app = express();
@@ -15,7 +18,7 @@ app.use(express.json());
 app.use(compression());
 
 AWS.config.update({
-  credentials: new AWS.Credentials(config.secrets.ACCESS_KEY_ID, config.secrets.ACCESS_SECRET_ID),
+  credentials: new AWS.Credentials(SECRETS.ACCESS_KEY_ID, SECRETS.ACCESS_SECRET_ID),
   region: 'us-west-2'
 });
 
@@ -28,77 +31,17 @@ const options = {
 }
 
 const PORT = process.env.PORT || 4000;
-
-
-app.post('/search/activity', (req, res) => {
-
-  const term = req.body.searchTerm;
-
-  client.search({
-    index: config.indexes.CAMP_ACTIVITY,
-    body: {
-      query: {
-        match: {
-          "activity": term
-        }
-      }
-    }
-  }).then(response => {
-    const data = response.hits.hits;
-    const campids = data.map(item => item._source.campid);
-    client.search({
-      index: config.indexes.CAMPS,
-      body: {
-        "query": {
-          "constant_score": {
-            "filter": {
-              "terms": {
-                "idcampdetails": campids
-              }
-            }
-          }
-        }
-      }
-    }).then(response => {
-      res.status(200).send({
-        data: response.hits.hits
-      });
-    })
-  }).catch(error => {
-    console.log('error from elastic-search ' + error);
-    res.status(400).send({
-      error
-    });
-  });
-});
-
-
-app.get('/activities', (req, res, next) => {
-
-  client.search({
-    index: config.indexes.ACTIVITY,
-    body: {
-      query: {
-        match_all: {}
-      }
-    }
-  }).then(response => {
-    const data = response.hits.hits;
-    res.status(400).send({
-      data: data.map(item => {
-        return {
-          id: item._source.idactivity,
-          name: item._source.name
-        }
-      })
-    });
-  }).catch(error => {
-    console.log('error from elastic-search ' + error);
-    res.status(400).send({
-      error
-    });
-  });
-});
-
 const client = new elasticsearch.Client(options);
-app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`))
+
+const setRoutes = (routes) => {
+  routes.forEach((route) => {
+    require(route).default(app, client); // eslint-disable-line global-require, import/no-dynamic-require
+  });
+};
+
+/* istanbul ignore next */
+const routes = [getAllActivitesRoute, getCampsPerActivityRoute, searchCampByActivityRoute];
+setRoutes(routes);
+
+
+app.listen(PORT, () => console.log(`Camp search server is running on port ${PORT}!`))
