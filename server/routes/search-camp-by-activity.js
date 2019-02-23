@@ -3,7 +3,6 @@ import { INDEXES } from '../../config/secrets.config';
 export default function (app, client) {
 
     app.post('/search/activity', (req, res) => {
-
         const term = req.body.searchTerm;
 
         client.search({
@@ -19,7 +18,7 @@ export default function (app, client) {
             const data = response.hits.hits;
             const campids = data.map(item => item._source.campid);
             client.search({
-                index: config.indexes.CAMPS,
+                index: INDEXES.CAMPS,
                 body: {
                     query: {
                         constant_score: {

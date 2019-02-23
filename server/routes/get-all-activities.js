@@ -6,13 +6,14 @@ export default function (app, client) {
         client.search({
             index: INDEXES.ACTIVITY,
             body: {
+                size: 50,
                 query: {
                     match_all: {}
                 }
             }
         }).then(response => {
             const data = response.hits.hits;
-            res.status(400).send({
+            res.status(200).send({
                 data: data.map(item => {
                     return {
                         id: item._source.idactivity,
