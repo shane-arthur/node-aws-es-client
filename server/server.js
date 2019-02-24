@@ -5,6 +5,7 @@ import { initCognito } from './utils/init-cognito';
 const getAllActivitesRoute = './routes/get-all-activities';
 const getCampsPerActivityRoute = './routes/get-all-camps-per-activity';
 const searchCampByActivityRoute = './routes/search-camp-by-activity';
+const searchCampById = './routes/get-camp-by-id';
 
 // Express server
 const app = express();
@@ -30,7 +31,7 @@ const setRoutes = (routes) => {
   });
 };
 
-const routes = [getAllActivitesRoute, getCampsPerActivityRoute, searchCampByActivityRoute];
+const routes = [getAllActivitesRoute, getCampsPerActivityRoute, searchCampByActivityRoute, searchCampById];
 setRoutes(routes);
 
 app.listen(PORT, () => console.log(`Camp search server is running on port ${PORT}!`))
